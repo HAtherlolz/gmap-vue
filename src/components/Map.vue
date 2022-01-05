@@ -15,8 +15,8 @@
           @click="toggleClusterInfo"
           >
           <GMapMarker
-            :key="id"
-            v-for="(m, id) in markers"
+            :key="index"
+            v-for="(m, index) in markers"
 
             :position="m"
             :icon='{
@@ -41,7 +41,7 @@
       <label for="name">Title</label>
       <input class="input_text" type="text" id="name" required v-model="name">
       <label for="pass">Image path</label>
-      <input class="input_text" type="text" id="image" required v-model="img">
+      <input class="input_text" type="file" id="image" name="img" required v-on:change="fileSend">
       <label for="latitude">latitude</label>
       <input class="input_text" type="text" id="lat" required v-model="lat">
       <label for="longitude">longitude</label>
@@ -54,8 +54,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import InfoTable from "../components/InfoTable"
+import axios from 'axios'
 
 export default {
   name: "Map",
@@ -70,57 +71,8 @@ export default {
     const lat = ref('')
     const lng = ref('')
 
-    const values = ref([
-      {
-        id: 1,
-        img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
-        name: "Ground",
-        lat: 46.12,
-        lng: 31.321
-      },
-      {
-        id: 2,
-        img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
-        name: "Ground",
-        lat: 46.122444,
-        lng: 31.32123
-      },
-      {
-        id: 3,
-        img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
-        name: "Ground",
-        lat: 46.12333,
-        lng: 31.321241
-      },
-      {
-        id: 4,
-        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
-        name: "Car",
-        lat: 46.97503,
-        lng: 31.99458
-      },
-      {
-        id: 5,
-        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
-        name: "Car",
-        lat: 46.97913,
-        lng: 31.99758
-      },
-      {
-        id: 6,
-        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
-        name: "Car",
-        lat: 46.96103,
-        lng: 31.992358
-      },
-      {
-        id: 7,
-        img: "https://cdn.vox-cdn.com/thumbor/KrNjaW263LdvsGPRg1valjIn_rI=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/21818147/iStock_172413371.jpg",
-        name: "Build",
-        lat: 47.213,
-        lng: 31.238
-      },
-    ])
+    const values = ref([])
+
     const clusterIcon = [
       {
         textColor: 'white',
@@ -131,75 +83,49 @@ export default {
       },
     ]
     const center = {lat: 50.4546600, lng: 30.5238000}
-    const markers = ref([
-      {
-        id: 1,
-        img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
-        name: "Ground",
-        lat: 46.12,
-        lng: 31.321
-      },
-      {
-        id: 2,
-        img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
-        name: "Ground",
-        lat: 46.122444,
-        lng: 31.32123
-      },
-      {
-        id: 3,
-        img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
-        name: "Ground",
-        lat: 46.12333,
-        lng: 31.321241
-      },
-      {
-        id: 4,
-        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
-        name: "Car",
-        lat: 46.97503,
-        lng: 31.99458
-      },
-      {
-        id: 5,
-        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
-        name: "Car",
-        lat: 46.97913,
-        lng: 31.99758
-      },
-      {
-        id: 6,
-        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
-        name: "Car",
-        lat: 46.96103,
-        lng: 31.992358
-      },
-      {
-        id: 7,
-        img: "https://cdn.vox-cdn.com/thumbor/KrNjaW263LdvsGPRg1valjIn_rI=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/21818147/iStock_172413371.jpg",
-        name: "Build",
-        lat: 47.213,
-        lng: 31.238
-      },
+    const markers = ref([])
 
-    ])
+    const getGmapMarkerList = async () => {
+       await axios.get(
+         'https://gmap-django.herokuapp.com/list/'
+       ).then(response => markers.value = response.data)
 
+      // console.log(markers.value)
+      // console.log(values.value)
+
+      for(let val of markers.value) {
+        console.log(val.name)
+        values.value.push(
+        {
+          id : val.id,
+          name : val.name,
+          img : val.img,
+          lat : val.lat,
+          lng : val.lng
+        }
+        )
+      }
+
+    }
+    onMounted(getGmapMarkerList)
     const toggleClusterInfo = (cluster) => {
       let markers_positions = []
-
+      console.log(markers)
       for (let i in cluster.markers_) {
         let pos_arr = []
         pos_arr.push(cluster.markers_[i].position.lat())
         pos_arr.push(cluster.markers_[i].position.lng())
       markers_positions.push(pos_arr)
+      console.log(markers_positions)
       }
 
-      exists(markers_positions, markers)
+      exists(markers_positions)
       return markers_positions
     }
 
-    const exists = (markers_positions, markers) => {
-
+    const exists = (markers_positions) => {
+      console.log(markers)
+      console.log(markers_positions)
       values.value.splice(0, values.value.length)
 
       for (let i in markers_positions){
@@ -214,6 +140,7 @@ export default {
                 lng : markers.value[j].lng,
               }
             )
+            console.log(values.value)
           }
         }
       }
@@ -237,32 +164,45 @@ export default {
 
     }
 
-    const sendGood = () => {
+    const fileSend = (event) => {
+      img.value = event.target.files[0]
+      console.log(img.value)
+    }
 
-      markers.value.push(
-        {
-          id : markers.value.length + 1,
-          img : img.value,
-          name : name.value,
-          lat : +lat.value,
-          lng : +lng.value,
+    const sendGood = async () => {
+      const formData = new FormData();
+      formData.append("name", name.value)
+      formData.append("lat", lat.value)
+      formData.append("lng", lng.value)
+      formData.append("img", img.value)
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data; boundary=something'
         }
-      )
+      }
+      axios.post('https://gmap-django.herokuapp.com/create/', formData, config)
+
+      // name.value = ""
+      // lat.value= ""
+      // lng.value=""
     }
 
     return {
+      getGmapMarkerList,
       center,
       markers,
       getLockationIngo,
       values,
       clusterIcon,
       toggleClusterInfo,
-      exists,
+      // exists,
       sendGood,
       name,
       img,
       lat,
-      lng
+      lng,
+      fileSend
     }
   }
 }
@@ -329,3 +269,53 @@ export default {
   }
 
 </style>
+
+<!-- {
+  id: 1,
+  img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
+  name: "Ground",
+  lat: 46.12,
+  lng: 31.321
+},
+{
+  id: 2,
+  img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
+  name: "Ground",
+  lat: 46.122444,
+  lng: 31.32123
+},
+{
+  id: 3,
+  img: 'https://playo.imgix.net/HARSHACRICKETGROUND/2.PNG?auto=compress,format&h=300',
+  name: "Ground",
+  lat: 46.12333,
+  lng: 31.321241
+},
+{
+  id: 4,
+  img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
+  name: "Car",
+  lat: 46.97503,
+  lng: 31.99458
+},
+{
+  id: 5,
+  img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
+  name: "Car",
+  lat: 46.97913,
+  lng: 31.99758
+},
+{
+  id: 6,
+  img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSddflulvnY1sM74iww7XOzZqZmb6mF7xkYmA&usqp=CAU',
+  name: "Car",
+  lat: 46.96103,
+  lng: 31.992358
+},
+{
+  id: 7,
+  img: "https://cdn.vox-cdn.com/thumbor/KrNjaW263LdvsGPRg1valjIn_rI=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/21818147/iStock_172413371.jpg",
+  name: "Build",
+  lat: 47.213,
+  lng: 31.238
+}, -->

@@ -13,20 +13,49 @@
 
 <script>
 import { ref } from 'vue'
+// import axios from 'axios'
 export default {
   name: "InfoTable",
   props: ['infotable'],
 
   setup(props) {
-    // const values = ref([])
-    console.log(props.infotable)
-    const values = ref(props.infotable)
-    // const a = ref(props.infotable)
-    // console.log(a)
 
+    console.log(props.infotable)
+    // const values = ref([])
+    const values = ref(props.infotable)
+    // if (props_values.value.length == 0) {
+    //   axios.get(
+    //     'http://127.0.0.1:8000/list/'
+    //   ).then(response => values.value = response.data)
+    //   console.log("0")
+    // } else {
+    //   console.log("1")
+    //   for(let val of props_values.value) {
+    //     console.log(val.name)
+    //     values.value.push(
+    //     {
+    //       id : val.id,
+    //       name : val.name,
+    //       img : val.img,
+    //       lat : val.lat,
+    //       lng : val.lng
+    //     }
+    //     )
+    //   }
+    // }
+
+    // const getGmapMarkerList = async () => {
+    //    await axios.get(
+    //      'http://127.0.0.1:8000/list/'
+    //    ).then(response => values.value = response.data)
+    //   // console.log(markers.value.data.results)
+    // }
+    // const val = ref(props.infotable)
+
+    // onMounted(getGmapMarkerList)
 
     return {
-      values,
+      values
     }
   }
 }
